@@ -1,0 +1,36 @@
+[project]
+license = { file = "LICENSE" }
+name = "cli-pybench"
+version = "0.0.1"
+description = "your_description_here"
+readme = "README.md"
+requires-python = ">=3.7"
+authors = [{ name = "Cangyuan Li", email = "everest229@gmail.com" }]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+]
+dependencies = []
+
+[project.urls]
+"Homepage" = "https://github.com/CangyuanLi/cli-pybench"
+"Source" = "https://github.com/CangyuanLi/cli-pybench"
+"Bug Reports" = "https://github.com/CangyuanLi/cli-pybench/issues"
+
+[build-system]
+requires = ["setuptools>=42", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.pytest.ini_options]
+addopts = "--cov=test_proj"
+testpaths = ["tests"]
+
+[tool.mypy]
+mypy_path = "src"
+ignore_missing_imports = true
+
+[tool.isort]
+profile = "black"
+
+[tool.ruff.per-file-ignores]
+"__init__.py" = ["E402", "F401"]

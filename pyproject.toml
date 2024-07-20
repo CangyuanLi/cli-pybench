@@ -10,7 +10,7 @@ classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
 ]
-dependencies = []
+dependencies = ["polars >= 1.0.0", "toml", "tqdm"]
 
 [project.urls]
 "Homepage" = "https://github.com/CangyuanLi/cli-pybench"
@@ -21,8 +21,10 @@ dependencies = []
 requires = ["setuptools>=42", "wheel"]
 build-backend = "setuptools.build_meta"
 
+[project.scripts]
+pybench = "pybench.cli:main"
+
 [tool.pytest.ini_options]
-addopts = "--cov=test_proj"
 testpaths = ["tests"]
 
 [tool.mypy]

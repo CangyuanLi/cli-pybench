@@ -1,7 +1,7 @@
 [project]
 license = { file = "LICENSE" }
 name = "cli-pybench"
-version = "0.0.1"
+version = "0.0.2"
 description = "your_description_here"
 readme = "README.md"
 requires-python = ">=3.7"

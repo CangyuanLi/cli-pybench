@@ -5,6 +5,7 @@ import inspect
 import json
 import timeit
 from pathlib import Path
+from typing import Optional
 
 import polars as pl
 import toml
@@ -66,25 +67,32 @@ def get_default_args(func) -> dict:
 
 
 class Bench:
-    def __init__(self):
+    def __init__(self, benchpath: Optional[Path] = None):
         self.rootdir = self.get_rootdir()
         self.config = self.load_config()
-        self.benchpath = self.rootdir / self.config.benchpath
+
+        self.benchpath = (
+            self.rootdir / self.config.benchpath if benchpath is None else benchpath
+        )
+        self.benchdir = Path(self.config.benchpath)
 
     @staticmethod
     def get_rootdir():
         return Path.cwd()
 
     def get_bench_files(self):
-        bench_files = []
-        for root, dirs, files in self.benchpath.walk():
-            for dir in dirs:
-                if dir == "__pycache__":
-                    continue
+        if self.benchpath.is_dir():
+            bench_files = []
+            for root, dirs, files in self.benchpath.walk():
+                for dir in dirs:
+                    if dir == "__pycache__":
+                        continue
 
-            for file in files:
-                if file.startswith("bench_") and file[-3:] == ".py":
-                    bench_files.append(root / file)
+                for file in files:
+                    if file.startswith("bench_") and file[-3:] == ".py":
+                        bench_files.append(root / file)
+        else:
+            bench_files = [self.benchpath]
 
         return bench_files
 
@@ -195,11 +203,11 @@ class Bench:
             [self.load_results(), self.results], how="vertical"
         )
 
-        res.write_parquet(self.benchpath / "results.parquet")
+        res.write_parquet(self.benchdir / "results.parquet")
 
     def load_results(self):
         try:
-            return pl.read_parquet(self.benchpath / "results.parquet")
+            return pl.read_parquet(self.benchdir / "results.parquet")
         except FileNotFoundError:
             return pl.DataFrame()
 

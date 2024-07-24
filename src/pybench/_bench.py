@@ -5,13 +5,24 @@ import inspect
 import json
 import timeit
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Union
 
 import polars as pl
 import toml
 import tqdm
 
-from ._metadata import _get_branch_name, _get_commit_id, _get_time, _get_version
+from ._metadata import (
+    _get_available_cpus,
+    _get_available_ram,
+    _get_branch_name,
+    _get_commit_id,
+    _get_platform,
+    _get_processor,
+    _get_time,
+    _get_version,
+)
+
+PathLike = Union[Path, str]
 
 
 @dataclasses.dataclass
@@ -67,12 +78,14 @@ def get_default_args(func) -> dict:
 
 
 class Bench:
-    def __init__(self, benchpath: Optional[Path] = None):
+    def __init__(self, benchpath: Optional[PathLike] = None):
         self.rootdir = self.get_rootdir()
         self.config = self.load_config()
 
         self.benchpath = (
-            self.rootdir / self.config.benchpath if benchpath is None else benchpath
+            self.rootdir / self.config.benchpath
+            if benchpath is None
+            else Path(benchpath)
         )
         self.benchdir = Path(self.config.benchpath)
 
@@ -99,6 +112,9 @@ class Bench:
     def run(self):
         print("starting benchmark session ...")
         print(f"default config: {self.config}")
+        print(
+            f"running on {_get_platform()} with {_get_processor()}, available cpus: {_get_available_cpus()}, RAM: {_get_available_ram()}"
+        )
         timing_dfs = []
         config_dfs = []
         metadata_df = pl.LazyFrame(

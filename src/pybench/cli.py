@@ -1,6 +1,5 @@
 import argparse
 from importlib.metadata import version
-from pathlib import Path
 
 from ._bench import Bench
 
@@ -30,7 +29,7 @@ def get_parser():
 def main():
     args = get_parser().parse_args()
 
-    bench = Bench(Path(args.benchpath))
+    bench = Bench(args.benchpath)
     bench.run()
     bench.save_results()
 

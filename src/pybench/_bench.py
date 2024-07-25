@@ -112,20 +112,25 @@ class Bench:
     def run(self):
         print("starting benchmark session ...")
         print(f"default config: {self.config}")
+
+        metadata = {
+            "meta_join_id": True,
+            "timestamp": _get_time(),
+            "branch": _get_branch_name(),
+            "commit": _get_commit_id(),
+            "version": _get_version(self.rootdir),
+            "available_cpus": _get_available_cpus(),
+            "available_ram": _get_available_ram(),
+            "platform": _get_platform(),
+            "processor": _get_processor(),
+        }
+
         print(
-            f"running on {_get_platform()} with {_get_processor()}, available cpus: {_get_available_cpus()}, RAM: {_get_available_ram()}"
+            f"running on {metadata["platform"]} with {metadata["processor"]}, available cpus: {metadata["available_cpus"]}, RAM: {metadata["available_ram"]}"
         )
         timing_dfs = []
         config_dfs = []
-        metadata_df = pl.LazyFrame(
-            {
-                "meta_join_id": True,
-                "timestamp": _get_time(),
-                "branch": _get_branch_name(),
-                "commit": _get_commit_id(),
-                "version": _get_version(self.rootdir),
-            }
-        )
+        metadata_df = pl.LazyFrame(metadata)
 
         for file in self.get_bench_files():
             print("")
@@ -216,7 +221,7 @@ class Bench:
 
     def save_results(self):
         res: pl.DataFrame = pl.concat(
-            [self.load_results(), self.results], how="vertical"
+            [self.load_results(), self.results], how="diagonal_relaxed"
         )
 
         res.write_parquet(self.benchdir / "results.parquet")

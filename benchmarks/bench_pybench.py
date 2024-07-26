@@ -30,6 +30,10 @@ def bench_my_func2(a, b):
     return a + b
 
 
-@pybench.parametrize({"a": [1, 2]})
+def setup(a):
+    return {"a": a + 1}
+
+
+@pybench.parametrize({"a": [1, 2]}, setup=setup)
 def bench_my_func3(a):
     return a

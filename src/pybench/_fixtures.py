@@ -56,6 +56,8 @@ def parametrize(
                 else:
                     part = functools.partial(func, **setup(**kwargs))
 
+                part._params = kwargs
+
                 funcs.append(part)
 
             func._funcs = funcs

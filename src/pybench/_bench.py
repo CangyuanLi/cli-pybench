@@ -169,8 +169,6 @@ class Bench:
                     fs = [real_func]
 
                 for f in fs:
-                    args = get_default_args(f)
-
                     for _ in range(config["warmups"]):
                         f()
 
@@ -180,6 +178,11 @@ class Bench:
                         repeat=config["repeat"],
                         number=config["number"],
                     )
+
+                    if hasattr(f, "_params"):
+                        args = f._params
+                    else:
+                        args = {}
 
                     timing_dfs.append(
                         pl.LazyFrame(

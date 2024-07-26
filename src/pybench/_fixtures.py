@@ -44,6 +44,7 @@ def parametrize(
     def decorator(func):
         @functools.wraps(func)
         def wrapper():
+            funcs = []
             for params in argvalues:
                 kwargs = {
                     param_name: param
@@ -51,9 +52,15 @@ def parametrize(
                 }
 
                 if setup is None:
-                    yield functools.partial(func, **kwargs)
+                    part = functools.partial(func, **kwargs)
                 else:
-                    yield functools.partial(func, **setup(**kwargs))
+                    part = functools.partial(func, **setup(**kwargs))
+
+                funcs.append(part)
+
+            func._funcs = funcs
+
+            return func
 
         return wrapper
 

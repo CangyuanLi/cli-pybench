@@ -129,7 +129,7 @@ class Bench:
             f"running on {metadata["platform"]} with {metadata["processor"]}, available cpus: {metadata["available_cpus"]}, RAM: {metadata["available_ram"]}"
         )
         timing_dfs = []
-        config_dfs = []
+        configs = []
         metadata_df = pl.LazyFrame(metadata)
 
         for file in self.get_bench_files():
@@ -146,12 +146,6 @@ class Bench:
 
             for func in tqdm.tqdm(funcs):
                 func_name = func.__name__
-                decorators = get_decorators(func)
-
-                is_parametrized = False
-                for decorator in decorators[func_name]:
-                    if decorator == "parametrize":
-                        is_parametrized = True
 
                 real_func = func()
 
@@ -162,22 +156,24 @@ class Bench:
                     config = real_func._config | self.config.__dict__
 
                 else:
-                    config = self.config.__dict__
+                    config = self.config.__dict__.copy()
 
                 setup = "gc.enable()" if config["garbage_collection"] else "pass"
 
-                config_dfs.append(
-                    pl.LazyFrame(config).with_columns(
-                        pl.lit(func_name).alias("function")
-                    )
-                )
+                config["function"] = func_name
+                configs.append(config)
 
-                fs = [real_func] if not is_parametrized else real_func()
+                if hasattr(real_func, "_funcs"):
+                    fs = real_func._funcs
+                else:
+                    fs = [real_func]
 
                 for f in fs:
                     args = get_default_args(f)
+
                     for _ in range(config["warmups"]):
-                        pass
+                        f()
+
                     timings = timeit.repeat(
                         f,
                         setup=setup,
@@ -199,7 +195,7 @@ class Bench:
             raise SystemExit("No benchmarks ran")
 
         timing_df: pl.LazyFrame = pl.concat(timing_dfs)
-        config_df: pl.LazyFrame = pl.concat(config_dfs)
+        config_df: pl.LazyFrame = pl.LazyFrame(configs)
 
         df = (
             timing_df.group_by("function", "parameters")
@@ -214,7 +210,6 @@ class Bench:
             .with_columns(pl.lit(True).alias("meta_join_id"))
             .join(metadata_df, on="meta_join_id", how="left", validate="m:1")
             .drop("benchpath", "meta_join_id")
-            .collect()
         )
 
         self.results = df

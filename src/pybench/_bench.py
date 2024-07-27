@@ -160,7 +160,7 @@ class Bench:
 
                 setup = "gc.enable()" if config["garbage_collection"] else "pass"
 
-                config["function"] = func_name
+                config["function"] = func_name.lstrip("bench_")
                 configs.append(config)
 
                 if hasattr(real_func, "_funcs"):
@@ -180,17 +180,22 @@ class Bench:
                     )
 
                     if hasattr(f, "_params"):
-                        args = f._params
+                        args = json.dumps(f._params)
                     else:
-                        args = {}
+                        args = None
 
                     timing_dfs.append(
                         pl.LazyFrame(
                             {
-                                "function": func_name,
+                                "function": config["function"],
                                 "time": timings,
-                                "parameters": json.dumps(args),
-                            }
+                                "parameters": args,
+                            },
+                            schema={
+                                "function": pl.String,
+                                "time": pl.Float64,
+                                "parameters": pl.String,
+                            },
                         )
                     )
 

@@ -27,6 +27,11 @@ pybench = "pybench.cli:main"
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 
+[tool.pybench]
+repeat = 100
+number = 10
+warmups = 1
+
 [tool.mypy]
 mypy_path = "src"
 ignore_missing_imports = true

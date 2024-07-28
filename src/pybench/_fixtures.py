@@ -39,7 +39,7 @@ def parametrize(
 
     if isinstance(argnames, dict):
         argvalues = itertools.product(*argnames.values())
-        param_names = argnames.keys()
+        argnames = argnames.keys()
 
     def decorator(func):
         @functools.wraps(func)
@@ -48,7 +48,7 @@ def parametrize(
             for params in argvalues:
                 kwargs = {
                     param_name: param
-                    for param_name, param in zip(param_names, params, strict=True)
+                    for param_name, param in zip(argnames, params, strict=True)
                 }
 
                 if setup is None:

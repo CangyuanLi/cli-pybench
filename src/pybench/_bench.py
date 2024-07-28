@@ -160,7 +160,7 @@ class Bench:
 
                 setup = "gc.enable()" if config["garbage_collection"] else "pass"
 
-                config["function"] = func_name.lstrip("bench_")
+                config["function"] = func_name[6:]  # remove the starting bench_
                 configs.append(config)
 
                 if hasattr(real_func, "_funcs"):

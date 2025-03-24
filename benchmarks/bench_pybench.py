@@ -1,7 +1,7 @@
 import pybench
 
 
-@pybench.config(number=10)
+@pybench.config(number=50)
 def bench_my_func4():
     return 1
 

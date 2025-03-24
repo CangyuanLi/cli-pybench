@@ -157,8 +157,7 @@ class Bench:
                     continue
 
                 if hasattr(func, "_config"):
-                    config = func._config | self.config.__dict__
-
+                    config = self.config.__dict__ | func._config
                 else:
                     config = self.config.__dict__.copy()
 

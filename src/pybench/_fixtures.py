@@ -4,13 +4,18 @@ from collections.abc import Iterable
 from typing import Any, Callable, Optional, Union
 
 
+class mark:
+    def config(self, **config_kwargs):
+        pass
+
+
 def config(**config_kwargs):
     def decorator(func):
         @functools.wraps(func)
         def wrapper():
-            func._config = config_kwargs
-
             return func
+
+        wrapper._config = config_kwargs
 
         return wrapper
 
@@ -21,8 +26,9 @@ def skipif(condition: bool, reason: str = ""):
     def decorator(func):
         @functools.wraps(func)
         def wrapper():
-            func._skip = condition
             return func
+
+        wrapper._skip = condition
 
         return wrapper
 
@@ -41,28 +47,22 @@ def parametrize(
         argvalues = itertools.product(*argnames.values())
         argnames = argnames.keys()
 
+    kwargs_list = []
+    for params in argvalues:
+        kwargs = {
+            param_name: param
+            for param_name, param in zip(argnames, params, strict=True)
+        }
+
+        kwargs_list.append(kwargs)
+
     def decorator(func):
         @functools.wraps(func)
         def wrapper():
-            funcs = []
-            for params in argvalues:
-                kwargs = {
-                    param_name: param
-                    for param_name, param in zip(argnames, params, strict=True)
-                }
-
-                if setup is None:
-                    part = functools.partial(func, **kwargs)
-                else:
-                    part = functools.partial(func, **setup(**kwargs))
-
-                part._params = kwargs
-
-                funcs.append(part)
-
-            func._funcs = funcs
-
             return func
+
+        wrapper._params = kwargs_list
+        wrapper._setup = setup
 
         return wrapper
 

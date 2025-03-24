@@ -1,5 +1,6 @@
 import ast
 import dataclasses
+import functools
 import importlib.util
 import inspect
 import json
@@ -147,13 +148,11 @@ class Bench:
             for func in tqdm.tqdm(funcs):
                 func_name = func.__name__
 
-                real_func = func()
-
-                if hasattr(real_func, "_skip") and real_func._skip:
+                if hasattr(func, "_skip") and func._skip:
                     continue
 
-                if hasattr(real_func, "_config"):
-                    config = real_func._config | self.config.__dict__
+                if hasattr(func, "_config"):
+                    config = func._config | self.config.__dict__
 
                 else:
                     config = self.config.__dict__.copy()
@@ -163,10 +162,17 @@ class Bench:
                 config["function"] = func_name[6:]  # remove the starting bench_
                 configs.append(config)
 
-                if hasattr(real_func, "_funcs"):
-                    fs = real_func._funcs
+                if hasattr(func, "_funcs"):
+                    fs = []
+                    for params in func._params:
+                        if func._setup is None:
+                            part = functools.partial(func, **params)
+                        else:
+                            part = functools.partial(func, **setup(**params))
+
+                    fs.append(part)
                 else:
-                    fs = [real_func]
+                    fs = [func]
 
                 for f in fs:
                     for _ in range(config["warmups"]):

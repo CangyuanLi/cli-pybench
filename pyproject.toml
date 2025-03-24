@@ -31,6 +31,7 @@ testpaths = ["tests"]
 repeat = 100
 number = 10
 warmups = 1
+partition_by = ["commit"]
 
 [tool.mypy]
 mypy_path = "src"

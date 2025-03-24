@@ -4,11 +4,6 @@ from collections.abc import Iterable
 from typing import Any, Callable, Optional, Union
 
 
-class mark:
-    def config(self, **config_kwargs):
-        pass
-
-
 def config(**config_kwargs):
     def decorator(func):
         @functools.wraps(func)

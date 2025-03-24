@@ -16,6 +16,14 @@ def get_parser():
     )
 
     parser.add_argument(
+        "-n", "--no-save", action="store_true", help="disable saving of results"
+    )
+
+    parser.add_argument(
+        "-p", "--print", action="store_true", help="print out latest run"
+    )
+
+    parser.add_argument(
         "-v",
         "--version",
         action="version",
@@ -31,7 +39,34 @@ def main():
 
     bench = Bench(args.benchpath)
     bench.run()
-    bench.save_results()
+
+    if not args.no_save:
+        bench.save_results()
+
+    if args.print:
+        print(
+            bench.results.drop(
+                "available_cpus",
+                "available_ram",
+                "platform",
+                "processor",
+                "branch",
+                "commit",
+                "version",
+                "timestamp",
+                "repeat",
+                "number",
+                "warmups",
+                "garbage_collection",
+                "median",
+                "std",
+                "p5",
+                "p95",
+                "p1",
+                "p99",
+                strict=False,
+            ).sort("function", "parameters")
+        )
 
 
 if __name__ == "__main__":

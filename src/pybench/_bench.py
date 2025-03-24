@@ -4,6 +4,7 @@ import functools
 import importlib.util
 import inspect
 import json
+import shutil
 import timeit
 from pathlib import Path
 from typing import Optional, Union
@@ -33,6 +34,7 @@ class Config:
     number: int = 1
     warmups: int = 0
     garbage_collection: bool = False
+    partition_by: list[str] = dataclasses.field(default_factory=lambda: ["commit"])
 
 
 def get_decorators(cls):
@@ -88,7 +90,8 @@ class Bench:
             if benchpath is None
             else Path(benchpath)
         )
-        self.benchdir = Path(self.config.benchpath)
+        self.benchdir = Path(self.config.benchpath) / "data"
+        self.benchdir.mkdir(exist_ok=True, parents=True)
 
     @staticmethod
     def get_rootdir():
@@ -114,7 +117,7 @@ class Bench:
         print("starting benchmark session ...")
         print(f"default config: {self.config}")
 
-        metadata = {
+        self._metadata = {
             "meta_join_id": True,
             "timestamp": _get_time(),
             "branch": _get_branch_name(),
@@ -125,6 +128,8 @@ class Bench:
             "platform": _get_platform(),
             "processor": _get_processor(),
         }
+
+        metadata = self._metadata
 
         print(
             f"running on {metadata["platform"]} with {metadata["processor"]}, available cpus: {metadata["available_cpus"]}, RAM: {metadata["available_ram"]}"
@@ -224,22 +229,20 @@ class Bench:
             .with_columns(pl.lit(True).alias("meta_join_id"))
             .join(metadata_df, on="meta_join_id", how="left", validate="m:1")
             .drop("benchpath", "meta_join_id")
+            .collect()
         )
 
         self.results = df
 
     def save_results(self):
-        res: pl.DataFrame = pl.concat(
-            [self.load_results(), self.results], how="diagonal_relaxed"
-        )
+        save_dir = self.benchdir
+        for key in self.config.partition_by:
+            save_dir = save_dir / f"{key}={self._metadata[key]}"
+        save_path = save_dir / "results.parquet"
+        save_dir.mkdir(exist_ok=True)
 
-        res.write_parquet(self.benchdir / "results.parquet")
-
-    def load_results(self):
-        try:
-            return pl.read_parquet(self.benchdir / "results.parquet")
-        except FileNotFoundError:
-            return pl.DataFrame()
+        self.results.write_parquet(save_path)
+        shutil.copy(src=save_path, dst=self.benchdir / "results.parquet")
 
     def load_config(self):
         with open(self.rootdir / "pyproject.toml") as f:

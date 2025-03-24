@@ -35,6 +35,7 @@ def setup(a):
 
 
 @pybench.parametrize({"a": [1, 2]}, setup=setup)
+@pybench.config(repeat=5, number=10, warmups=10)
 def bench_my_func3(a):
     return a
 

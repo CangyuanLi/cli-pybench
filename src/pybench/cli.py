@@ -1,6 +1,8 @@
 import argparse
 from importlib.metadata import version
 
+import polars as pl
+
 from ._bench import Bench
 
 
@@ -34,6 +36,34 @@ def get_parser():
     return parser
 
 
+def readable_duration(seconds: float, parts_count: int = 3) -> str:
+    # https://stackoverflow.com/questions/26164671/convert-seconds-to-readable-format-time
+    """Returns readable time span out of number of seconds. No rounding."""
+
+    parts_with_units = [
+        (60 * 60, "h"),
+        (60, "m"),
+        (1, "s"),
+        (1e-3, "ms"),
+        (1e-6, "us"),
+    ]
+    info = ""
+    remaining = abs(seconds)
+    for time_part, unit in parts_with_units:
+        partial_amount = int(remaining // time_part)
+        if partial_amount:
+            optional_space = " " if info else ""
+            info += f"{optional_space}{partial_amount}{unit}"
+            remaining %= time_part
+            parts_count -= 1
+        if not parts_count:
+            break
+    if not info and seconds != 0:
+        return "~0s"
+
+    return info or "0s"
+
+
 def main():
     args = get_parser().parse_args()
 
@@ -44,29 +74,21 @@ def main():
         bench.save_results()
 
     if args.print:
-        print(
-            bench.results.drop(
-                "available_cpus",
-                "available_ram",
-                "platform",
-                "processor",
-                "branch",
-                "commit",
-                "version",
-                "timestamp",
-                "repeat",
-                "number",
-                "warmups",
-                "garbage_collection",
-                "median",
-                "std",
-                "p5",
-                "p95",
-                "p1",
-                "p99",
-                strict=False,
-            ).sort("function", "parameters")
+        display_df = bench.results.select(
+            "function",
+            "parameters",
+            pl.col("mean", "min", "max", "median", "p5", "p95").map_elements(
+                readable_duration, return_dtype=pl.String
+            ),
         )
+
+        if display_df["parameters"].is_null().all():
+            display_df = display_df.drop("parameters").sort("function")
+        else:
+            display_df = display_df.sort("function", "parameters")
+
+        with pl.Config(set_tbl_rows=-1):
+            print(display_df)
 
 
 if __name__ == "__main__":

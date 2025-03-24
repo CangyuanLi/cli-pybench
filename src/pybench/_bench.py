@@ -166,15 +166,16 @@ class Bench:
                 config["function"] = func_name[6:]  # remove the starting bench_
                 configs.append(config)
 
-                if hasattr(func, "_funcs"):
+                if hasattr(func, "_params"):
                     fs = []
                     for params in func._params:
                         if func._setup is None:
                             part = functools.partial(func, **params)
                         else:
-                            part = functools.partial(func, **setup(**params))
+                            part = functools.partial(func, **func._setup(**params))
 
-                    fs.append(part)
+                        part._params = params
+                        fs.append(part)
                 else:
                     fs = [func]
 

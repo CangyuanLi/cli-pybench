@@ -7,7 +7,7 @@ from typing import Any, Callable, Optional, Union
 def config(**config_kwargs):
     def decorator(func):
         @functools.wraps(func)
-        def wrapper():
+        def wrapper(*args, **kwargs):
             return func
 
         wrapper._config = config_kwargs
@@ -20,7 +20,7 @@ def config(**config_kwargs):
 def skipif(condition: bool, reason: str = ""):
     def decorator(func):
         @functools.wraps(func)
-        def wrapper():
+        def wrapper(*args, **kwargs):
             return func
 
         wrapper._skip = condition
@@ -53,7 +53,7 @@ def parametrize(
 
     def decorator(func):
         @functools.wraps(func)
-        def wrapper():
+        def wrapper(*args, **kwargs):
             return func
 
         wrapper._params = kwargs_list

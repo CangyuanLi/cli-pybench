@@ -225,6 +225,10 @@ class Bench:
                 pl.col("time").max().alias("max"),
                 pl.col("time").median().alias("median"),
                 pl.col("time").std().alias("std"),
+                pl.col("time").quantile(0.05).alias("p5"),
+                pl.col("time").quantile(0.95).alias("p95"),
+                pl.col("time").quantile(0.01).alias("p1"),
+                pl.col("time").quantile(0.99).alias("p99"),
             )
             .join(config_df, on="function", how="left", validate="m:1")
             .with_columns(pl.lit(True).alias("meta_join_id"))

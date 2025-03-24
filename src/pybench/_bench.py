@@ -213,7 +213,9 @@ class Bench:
             raise SystemExit("No benchmarks ran")
 
         timing_df: pl.LazyFrame = pl.concat(timing_dfs)
-        config_df: pl.LazyFrame = pl.LazyFrame(configs)
+        config_df: pl.LazyFrame = pl.LazyFrame(configs).drop(
+            "benchpath", "partition_by", strict=False
+        )
 
         df = (
             timing_df.group_by("function", "parameters")
@@ -227,7 +229,7 @@ class Bench:
             .join(config_df, on="function", how="left", validate="m:1")
             .with_columns(pl.lit(True).alias("meta_join_id"))
             .join(metadata_df, on="meta_join_id", how="left", validate="m:1")
-            .drop("benchpath", "meta_join_id")
+            .drop("meta_join_id")
             .collect()
         )
 

@@ -106,7 +106,7 @@ def main():
         display_df = bench.results.select(
             "function",
             "parameters",
-            pl.col("mean", "min", "max", "median", "p5", "p95").map_elements(
+            pl.col("mean", "min", "median", "p5", "p95").map_elements(
                 readable_duration, return_dtype=pl.String
             ),
         )

@@ -8,7 +8,7 @@ def config(**config_kwargs):
     def decorator(func):
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
-            return func
+            return func(*args, **kwargs)
 
         wrapper._config = config_kwargs
 
@@ -21,7 +21,7 @@ def skipif(condition: bool, reason: str = ""):
     def decorator(func):
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
-            return func
+            return func(*args, **kwargs)
 
         wrapper._skip = condition
 
@@ -54,7 +54,7 @@ def parametrize(
     def decorator(func):
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
-            return func
+            return func(*args, **kwargs)
 
         wrapper._params = kwargs_list
         wrapper._setup = setup

@@ -36,6 +36,34 @@ def get_parser():
     return parser
 
 
+def _collapse_units(s: str) -> str:
+    parts = s.split(" ")
+    if len(parts) <= 1:
+        return s
+
+    new_parts = []
+    for p in parts:
+        num = []
+        unit = []
+        for c in p:
+            if c.isdigit():
+                num.append(c)
+            else:
+                unit.append(c)
+
+        num = "".join(num)
+        unit = "".join(unit)
+
+        new_parts.append((num, unit))
+
+    p1, p2 = new_parts
+
+    if p1[1] in ("h", "m"):
+        return s
+
+    return f"{p1[0]}.{p2[0].zfill(3)}{p1[1]}"
+
+
 def readable_duration(seconds: float, parts_count: int = 3) -> str:
     # https://stackoverflow.com/questions/26164671/convert-seconds-to-readable-format-time
     """Returns readable time span out of number of seconds. No rounding."""
@@ -46,6 +74,7 @@ def readable_duration(seconds: float, parts_count: int = 3) -> str:
         (1, "s"),
         (1e-3, "ms"),
         (1e-6, "us"),
+        (1e-9, "ns"),
     ]
     info = ""
     remaining = abs(seconds)
@@ -61,7 +90,7 @@ def readable_duration(seconds: float, parts_count: int = 3) -> str:
     if not info and seconds != 0:
         return "~0s"
 
-    return info or "0s"
+    return _collapse_units(info) or "0s"
 
 
 def main():

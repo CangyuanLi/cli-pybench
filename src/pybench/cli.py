@@ -1,4 +1,5 @@
 import argparse
+import json
 from importlib.metadata import version
 
 import polars as pl
@@ -23,6 +24,10 @@ def get_parser():
 
     parser.add_argument(
         "-p", "--print", action="store_true", help="print out latest run"
+    )
+
+    parser.add_argument(
+        "--metadata", type=str, help="extra metadata to store in each run", default=None
     )
 
     parser.add_argument(
@@ -97,7 +102,9 @@ def main():
     args = get_parser().parse_args()
 
     bench = Bench(args.benchpath)
-    bench.run()
+    bench.run(
+        extra_metadata=None if args.metadata is None else json.loads(args.metadata)
+    )
 
     if not args.no_save:
         bench.save_results()

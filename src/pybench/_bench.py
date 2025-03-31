@@ -8,7 +8,7 @@ import shutil
 import sys
 import timeit
 from pathlib import Path
-from typing import Optional, Union
+from typing import Any, Optional, Union
 
 import polars as pl
 import toml
@@ -82,7 +82,10 @@ def get_default_args(func) -> dict:
 
 
 class Bench:
-    def __init__(self, benchpath: Optional[PathLike] = None):
+    def __init__(
+        self,
+        benchpath: Optional[PathLike] = None,
+    ):
         self.rootdir = self.get_rootdir()
         self.config = self.load_config()
 
@@ -114,9 +117,15 @@ class Bench:
 
         return bench_files
 
-    def run(self):
+    def run(
+        self,
+        extra_metadata: dict[str, Any] = None,
+    ):
         print("starting benchmark session ...")
         print(f"default config: {self.config}")
+
+        if extra_metadata is None:
+            extra_metadata = {}
 
         self._metadata = {
             "meta_join_id": True,
@@ -129,13 +138,16 @@ class Bench:
             "available_ram": _get_available_ram(),
             "platform": _get_platform(),
             "processor": _get_processor(),
-        }
+        } | extra_metadata
 
         metadata = self._metadata
 
         print(
             f"running on {metadata["platform"]}, python {metadata["python_version"].split(" ")[0]}, available cpus: {metadata["available_cpus"]}, RAM: {metadata["available_ram"]}"
         )
+        for k, v in extra_metadata.items():
+            print(f"\t{k}: {v}")
+
         timing_dfs = []
         configs = []
         metadata_df = pl.LazyFrame(metadata)

@@ -64,7 +64,7 @@ def _collapse_units(s: str) -> str:
     return f"{p1[0]}.{p2[0].zfill(3)}{p1[1]}"
 
 
-def readable_duration(seconds: float, parts_count: int = 3) -> str:
+def readable_duration(seconds: float, parts_count: int = 2) -> str:
     # https://stackoverflow.com/questions/26164671/convert-seconds-to-readable-format-time
     """Returns readable time span out of number of seconds. No rounding."""
 

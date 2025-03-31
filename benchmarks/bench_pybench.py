@@ -1,9 +1,11 @@
+import time
+
 import pybench
 
 
-@pybench.config(number=50)
+@pybench.config(repeat=1, number=1)
 def bench_my_func4():
-    return 1
+    time.sleep(1)
 
 
 @pybench.skipif(True)

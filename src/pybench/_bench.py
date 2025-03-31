@@ -5,6 +5,7 @@ import importlib.util
 import inspect
 import json
 import shutil
+import sys
 import timeit
 from pathlib import Path
 from typing import Optional, Union
@@ -123,6 +124,7 @@ class Bench:
             "branch": _get_branch_name(),
             "commit": _get_commit_id(),
             "version": _get_version(self.rootdir),
+            "python_version": sys.version,
             "available_cpus": _get_available_cpus(),
             "available_ram": _get_available_ram(),
             "platform": _get_platform(),
@@ -132,7 +134,7 @@ class Bench:
         metadata = self._metadata
 
         print(
-            f"running on {metadata["platform"]} with {metadata["processor"]}, available cpus: {metadata["available_cpus"]}, RAM: {metadata["available_ram"]}"
+            f"running on {metadata["platform"]}, python {metadata["python_version"].split(" ")[0]}, available cpus: {metadata["available_cpus"]}, RAM: {metadata["available_ram"]}"
         )
         timing_dfs = []
         configs = []

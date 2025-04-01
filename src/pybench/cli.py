@@ -1,5 +1,6 @@
 import argparse
 import json
+import re
 from importlib.metadata import version
 
 import polars as pl
@@ -24,6 +25,14 @@ def get_parser():
 
     parser.add_argument(
         "-p", "--print", action="store_true", help="print out latest run"
+    )
+
+    parser.add_argument(
+        "-k",
+        "--keyword",
+        type=str,
+        default=None,
+        help="specify a regex to control what benchmark functions are run",
     )
 
     parser.add_argument(
@@ -103,7 +112,8 @@ def main():
 
     bench = Bench(args.benchpath)
     bench.run(
-        extra_metadata=None if args.metadata is None else json.loads(args.metadata)
+        keyword_regex=None if args.keyword is None else re.compile(args.keyword),
+        extra_metadata=None if args.metadata is None else json.loads(args.metadata),
     )
 
     if not args.no_save:

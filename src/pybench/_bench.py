@@ -4,6 +4,7 @@ import functools
 import importlib.util
 import inspect
 import json
+import re
 import shutil
 import sys
 import timeit
@@ -119,7 +120,8 @@ class Bench:
 
     def run(
         self,
-        extra_metadata: dict[str, Any] = None,
+        keyword_regex: Optional[str] = None,
+        extra_metadata: Optional[dict[str, Any]] = None,
     ):
         print("starting benchmark session ...")
         print(f"default config: {self.config}")
@@ -162,11 +164,15 @@ class Bench:
             funcs = []
             for name, obj in module.__dict__.items():
                 if name.startswith("bench_") and callable(obj):
-                    funcs.append(obj)
+                    func_name = name[6:]  # remove the starting bench_
 
-            for func in tqdm.tqdm(funcs):
-                func_name = func.__name__
+                    if keyword_regex is not None:
+                        if not re.match(keyword_regex, func_name):
+                            continue
 
+                    funcs.append((func_name, obj))
+
+            for func_name, func in tqdm.tqdm(funcs):
                 if hasattr(func, "_skip") and func._skip:
                     continue
 
@@ -177,7 +183,7 @@ class Bench:
 
                 setup = "gc.enable()" if config["garbage_collection"] else "pass"
 
-                config["function"] = func_name[6:]  # remove the starting bench_
+                config["function"] = func_name
                 configs.append(config)
 
                 if hasattr(func, "_params"):

@@ -95,7 +95,7 @@ class Bench:
             if benchpath is None
             else Path(benchpath)
         )
-        self.benchdir = Path(self.config.benchpath) / "data"
+        self.benchdir = Path(self.config.benchpath) / "results"
         self.benchdir.mkdir(exist_ok=True, parents=True)
 
     @staticmethod

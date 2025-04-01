@@ -133,7 +133,7 @@ def main():
         else:
             display_df = display_df.sort("function", "parameters")
 
-        with pl.Config(set_tbl_rows=-1):
+        with pl.Config(set_tbl_rows=-1, set_tbl_hide_column_data_types=True):
             print(display_df)
 
 

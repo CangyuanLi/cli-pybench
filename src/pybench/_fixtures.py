@@ -4,13 +4,24 @@ from collections.abc import Iterable
 from typing import Any, Callable, Optional, Union
 
 
-def config(**config_kwargs):
+def config(
+    repeat: Optional[int] = None,
+    number: Optional[int] = None,
+    warmups: Optional[int] = None,
+    garbage_collection: Optional[bool] = None,
+):
     def decorator(func):
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
             return func(*args, **kwargs)
 
-        wrapper._config = config_kwargs
+        data = {
+            "repeat": repeat,
+            "number": number,
+            "warmups": warmups,
+            "garbage_collection": garbage_collection,
+        }
+        wrapper._config = {k: v for k, v in data.items() if v is not None}
 
         return wrapper
 

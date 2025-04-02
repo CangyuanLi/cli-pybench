@@ -261,11 +261,11 @@ class Bench:
         self.results = df
 
     def save_results(self):
-        save_dir = self.benchdir
+        save_dir = self.benchdir / "historical"
         for key in self.config.partition_by:
             save_dir = save_dir / f"{key}={self._metadata[key]}"
         save_path = save_dir / "results.parquet"
-        save_dir.mkdir(exist_ok=True)
+        save_dir.mkdir(parents=True, exist_ok=True)
 
         self.results.write_parquet(save_path)
         shutil.copy(src=save_path, dst=self.benchdir / "results.parquet")

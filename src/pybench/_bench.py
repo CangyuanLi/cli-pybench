@@ -152,6 +152,7 @@ class Bench:
 
         timing_dfs = []
         configs = []
+        per_function_metadata_list = []
         metadata_df = pl.LazyFrame(metadata)
 
         for file in self.get_bench_files():
@@ -175,6 +176,14 @@ class Bench:
             for func_name, func in tqdm.tqdm(funcs):
                 if hasattr(func, "_skip") and func._skip:
                     continue
+
+                if hasattr(func, "_metadata"):
+                    per_function_metadata = func._metadata
+                else:
+                    per_function_metadata = {}
+
+                per_function_metadata["function"] = func_name
+                per_function_metadata_list.append(per_function_metadata)
 
                 if hasattr(func, "_config"):
                     config = self.config.__dict__ | func._config
@@ -237,6 +246,9 @@ class Bench:
         config_df: pl.LazyFrame = pl.LazyFrame(configs).drop(
             "benchpath", "partition_by", strict=False
         )
+        per_function_metadata_df: pl.LazyFrame = pl.LazyFrame(
+            per_function_metadata_list
+        )
 
         df = (
             timing_df.group_by("function", "parameters")
@@ -252,6 +264,7 @@ class Bench:
                 pl.col("time").quantile(0.99).alias("p99"),
             )
             .join(config_df, on="function", how="left", validate="m:1")
+            .join(per_function_metadata_df, on="function", how="left", validate="m:1")
             .with_columns(pl.lit(True).alias("meta_join_id"))
             .join(metadata_df, on="meta_join_id", how="left", validate="m:1")
             .drop("meta_join_id")

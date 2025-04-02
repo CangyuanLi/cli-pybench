@@ -75,5 +75,14 @@ def parametrize(
     return decorator
 
 
-def metadata():
-    pass
+def metadata(**metadata_kwargs):
+    def decorator(func):
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            return func(*args, **kwargs)
+
+        wrapper._metadata = metadata_kwargs
+
+        return wrapper
+
+    return decorator

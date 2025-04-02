@@ -26,6 +26,7 @@ def bench_my_func(a, b):
     return a * b
 
 
+@pybench.metadata(group="add")
 @pybench.skipif(False)
 @pybench.parametrize({"a": [1, 2], "b": [3, 4]})
 def bench_my_func2(a, b):
@@ -42,6 +43,7 @@ def bench_my_func3(a):
     return a
 
 
+@pybench.metadata(group="add")
 @pybench.parametrize(("a", "b"), [(1, 2), (3, 4)])
 def bench_my_func8(a, b):
     return a + b

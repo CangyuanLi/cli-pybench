@@ -1,15 +1,13 @@
 [project]
-license = { file = "LICENSE" }
 name = "cli-pybench"
 version = "0.1.0"
-description = "your_description_here"
+description = "A pytest-like framework for benchmarking"
 readme = "README.md"
 requires-python = ">=3.7"
 authors = [{ name = "Cangyuan Li", email = "everest229@gmail.com" }]
-classifiers = [
-    "Programming Language :: Python :: 3",
-    "License :: OSI Approved :: MIT License",
-]
+classifiers = ["Programming Language :: Python :: 3"]
+license = "MIT"
+license-files = ["LICENSE"]
 dependencies = ["polars >= 1.0.0", "toml", "tqdm"]
 
 [project.urls]

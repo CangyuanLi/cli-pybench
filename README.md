@@ -33,7 +33,7 @@ Installing the library will expose a `pybench` command in your terminal. Althoug
 
 ```python
 def bench_my_sum():
-    return 1 + 1
+    1 + 1
 ```
 
 Then, simply run `pybench` from your terminal! It should look something like this:
@@ -47,7 +47,7 @@ running on Linux-5.15.123.1-microsoft-standard-WSL2-x86_64-with-glibc2.35 with x
 100%|██████████████████████████████████████████████████████████████████████████████████████████████████| 6/6 [00:00<00:00, 184.31it/s]
 ```
 
-Then, a "results.parquet" file will appear in your "benchmarks/" folder. If you want to change your configuration, you can do it globally through your "pyproject.toml" file like so:
+Then, a "results.parquet" file representing your most recent run will appear in your "benchmarks/results" folder. In addition, a Hive-partitioned folder will be created (by default partitioned by commit) in "benchmarks/results/historical". If you want to change your configuration, you can do it globally through your "pyproject.toml" file like so:
 
 ```
 [tool.pybench]
@@ -65,10 +65,10 @@ import pybench
 
 @pybench.config(repeat=1_000, number=100)
 def bench_my_sum():
-    return 1 + 1
+    1 + 1
 ```
 
-**pybench** provides two other decorators. One is the `pybench.skipif` decorator. It simply skips the function if the input evaluates to True. This is useful for a variety of reasons, for example, if you have a long-running benchmark that you do not want to run frequently. of course, all decorators can be combined.
+**pybench** provides three other decorators. One is the `pybench.skipif` decorator. It simply skips the function if the input evaluates to True. This is useful for a variety of reasons, for example, if you have a long-running benchmark that you do not want to run frequently. of course, all decorators can be combined.
 
 ```python
 import pybench
@@ -76,6 +76,20 @@ import pybench
 @pybench.config(repeat=1_000, number=100)
 @pybench.skipif(True)
 def bench_my_sum():
+    1 + 1
+```
+
+Another is `pybench.metadata`. This attaches arbitrary per-function metadata.
+
+```python
+import pybench
+
+@pybench.metadata(group="add")
+def bench_my_sum():
+    1 + 1
+
+@pybench.metadata(group="add")
+def bench_other_sum():
     1 + 1
 ```
 
@@ -89,7 +103,7 @@ def bench_my_sum(a, b):
     a + b
 ```
 
-This will benchmark `bench_my_sum` for the product of "a" and "b". Users of **pytest** may be more familiar with the second syntax.
+This will benchmark `bench_my_sum` for the product of "a" and "b", i.e. every pair of "a" and "b". Users of **pytest** may be more familiar with the second syntax.
 
 ```python
 import pybench

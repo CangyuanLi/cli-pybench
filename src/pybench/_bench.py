@@ -4,6 +4,7 @@ import functools
 import importlib.util
 import inspect
 import json
+import os
 import re
 import shutil
 import sys
@@ -105,14 +106,14 @@ class Bench:
     def get_bench_files(self):
         if self.benchpath.is_dir():
             bench_files = []
-            for root, dirs, files in self.benchpath.walk():
+            for root, dirs, files in os.walk(self.benchpath):
                 for dir in dirs:
                     if dir == "__pycache__":
                         continue
 
                 for file in files:
                     if file.startswith("bench_") and file[-3:] == ".py":
-                        bench_files.append(root / file)
+                        bench_files.append(Path(root) / file)
         else:
             bench_files = [self.benchpath]
 
@@ -145,7 +146,7 @@ class Bench:
         metadata = self._metadata
 
         print(
-            f"running on {metadata["platform"]}, python {metadata["python_version"].split(" ")[0]}, available cpus: {metadata["available_cpus"]}, RAM: {metadata["available_ram"]}"
+            f'running on {metadata["platform"]}, python {metadata["python_version"].split(" ")[0]}, available cpus: {metadata["available_cpus"]}, RAM: {metadata["available_ram"]}'
         )
         for k, v in extra_metadata.items():
             print(f"\t{k}: {v}")

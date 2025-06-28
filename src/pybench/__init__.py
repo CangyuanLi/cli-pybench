@@ -55,10 +55,8 @@ def parametrize(
 
     kwargs_list = []
     for params in argvalues:
-        kwargs = {
-            param_name: param
-            for param_name, param in zip(argnames, params, strict=True)
-        }
+        assert len(argnames) == len(params)
+        kwargs = {param_name: param for param_name, param in zip(argnames, params)}
 
         kwargs_list.append(kwargs)
 

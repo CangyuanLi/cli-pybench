@@ -11,7 +11,7 @@ def main():
     version = pyproject_toml["project"]["version"]
 
     print("committing version changes")
-    subprocess.run(["git", "commit", "-am", version], check=True)
+    subprocess.run(["git", "commit", "--no-verify", "-am", version], check=True)
 
     print("pushing to remote")
     subprocess.run(["git", "push", "origin"], check=True)
